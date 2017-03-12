@@ -10,10 +10,9 @@ organization := "org.example"
 
 scalaVersion in ThisBuild := "2.11.7"
 
-lazy val root = (project in file(".")).
-  settings(
-    libraryDependencies ++= Dependencies.addons
-  )
+lazy val root = (project in file(".")).settings(
+  libraryDependencies ++= Dependencies.addons
+)
 
 onLoad in Global := (Command.process("scalafmt", _: State)) compose (onLoad in Global).value
 
