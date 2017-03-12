@@ -1,7 +1,8 @@
-resolvers in ThisBuild ++= Seq("Apache Development Snapshot Repository" at "https://repository.apache.org/content/repositories/snapshots/",
+resolvers in ThisBuild ++= Seq(
+  "Apache Development Snapshot Repository" at "https://repository.apache.org/content/repositories/snapshots/",
   Resolver.mavenLocal)
 
-name := "Flink Project"
+name := "Flink Hands-On"
 
 version := "0.1-SNAPSHOT"
 
@@ -9,16 +10,12 @@ organization := "org.example"
 
 scalaVersion in ThisBuild := "2.11.7"
 
-val flinkVersion = "1.2.0"
-
-val flinkDependencies = Seq(
-  "org.apache.flink" %% "flink-scala" % flinkVersion % "provided",
-  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "provided")
-
 lazy val root = (project in file(".")).
   settings(
-    libraryDependencies ++= flinkDependencies
+    libraryDependencies ++= Dependencies.addons
   )
+
+onLoad in Global := (Command.process("scalafmt", _: State)) compose (onLoad in Global).value
 
 mainClass in assembly := Some("org.example.Job")
 
