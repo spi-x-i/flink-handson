@@ -1,4 +1,4 @@
-package org.example
+package org.spixi.flink.handson
 
 /**
   * Licensed to the Apache Software Foundation (ASF) under one
