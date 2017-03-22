@@ -18,6 +18,11 @@ onLoad in Global := (Command.process("scalafmt", _: State)) compose (onLoad in G
 
 mainClass in assembly := Some("org.spixi.Job")
 
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _ *) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
+
 // make run command include the provided dependencies
 run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run))
 

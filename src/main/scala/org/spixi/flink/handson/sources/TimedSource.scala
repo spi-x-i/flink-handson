@@ -1,11 +1,12 @@
 package org.spixi.flink.handson.sources
 
+import java.lang.Long
 import java.util
 import java.util.concurrent.atomic.AtomicBoolean
 
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.checkpoint.ListCheckpointed
-import org.apache.flink.streaming.api.functions.source.{RichParallelSourceFunction, RichSourceFunction}
+import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.apache.flink.streaming.api.watermark.Watermark
 import org.spixi.flink.handson.model.{TimeEvent, TimedEvent}
@@ -13,19 +14,10 @@ import org.spixi.flink.handson.model.{TimeEvent, TimedEvent}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
-class TimedSource(period: Long, slowDownFactor: Long)
-    extends RichParallelSourceFunction[TimeEvent[Long]]
-    with ListCheckpointed[Long] {
+class TimedSource(period: Long, slowDownFactor: Long) extends RichParallelSourceFunction[TimeEvent[Long]] {
 
-  private var currentTimeMs: Long = 0
+  private var currentTimeMs: Long = 0l
   private var isRunning = new AtomicBoolean(true)
-
-  override def restoreState(state: util.List[Long]): Unit = {
-    currentTimeMs = state.to[List].head
-  }
-
-  override def snapshotState(checkpointId: Long, timestamp: Long): util.List[Long] =
-    ListBuffer(List(currentTimeMs): _*)
 
   override def open(parameters: Configuration) = {
     super.open(parameters)
@@ -41,7 +33,7 @@ class TimedSource(period: Long, slowDownFactor: Long)
   override def run(ctx: SourceContext[TimeEvent[Long]]): Unit = {
     while (isRunning.get()) {
       ctx.getCheckpointLock.synchronized {
-        ctx.collectWithTimestamp(TimedEvent[Long](currentTimeMs, 0L), currentTimeMs)
+        ctx.collectWithTimestamp(TimedEvent[Long](currentTimeMs, 0l), currentTimeMs)
         ctx.emitWatermark(new Watermark(currentTimeMs))
         currentTimeMs += period
       }
@@ -66,4 +58,6 @@ class TimedSource(period: Long, slowDownFactor: Long)
       case rand => (rand * period).toLong
     }
   }
+
+  // TODO -> implement with checkpointing
 }

@@ -19,18 +19,26 @@ package org.spixi.flink.handson
   */
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.streaming.api.scala._
+import org.spixi.flink.handson.exercises.CustomPartitionExample
 import org.spixi.flink.handson.sources.TimedSource
 
 object HandsOn {
 
   def main(args: Array[String]) {
+
+    if (args.size == 0) {
+      throw new IllegalArgumentException("Wrong job parametrization.")
+    }
+
     // set up the execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
+    CustomPartitionExample.execute(env, args(0))
 
     // execute program
     env.execute("Flink Scala API Skeleton")
   }
+  /*
 
   private def generateSensorData(env: StreamExecutionEnvironment) = {
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(1000, 1000))
@@ -44,7 +52,7 @@ object HandsOn {
 
   }
 
-  /*
+
   private def generateSensorData(env: StreamExecutionEnvironment) = {
 
     // Transform into sawtooth pattern
