@@ -1,7 +1,6 @@
 package org.spixi.flink.handson.exercises
 
 import org.apache.flink.streaming.api.scala._
-import org.spixi.flink.handson.model.KeyedTimedEvent
 import org.spixi.flink.handson.sources.TimedKeyValueSource
 
 
