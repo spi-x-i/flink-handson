@@ -22,9 +22,11 @@ import org.apache.flink.streaming.api.scala._
 import org.spixi.flink.handson.sources.TimedSource
 
 object HandsOn {
+
   def main(args: Array[String]) {
     // set up the execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
+
 
     // execute program
     env.execute("Flink Scala API Skeleton")
@@ -41,6 +43,7 @@ object HandsOn {
     val timestampSource = env.addSource(new TimedSource(PERIOD_MS, SLOWDOWN_FACTOR)).name("test data")
 
   }
+
   /*
   private def generateSensorData(env: StreamExecutionEnvironment) = {
 
@@ -57,4 +60,5 @@ object HandsOn {
     sensorStream
   }
  */
+
 }
