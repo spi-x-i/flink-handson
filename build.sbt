@@ -6,7 +6,7 @@ name := "Flink Hands-On"
 
 version := "0.1-SNAPSHOT"
 
-organization := "org.example"
+organization := "org.spixi"
 
 scalaVersion in ThisBuild := "2.11.7"
 
@@ -16,7 +16,7 @@ lazy val root = (project in file(".")).settings(
 
 onLoad in Global := (Command.process("scalafmt", _: State)) compose (onLoad in Global).value
 
-mainClass in assembly := Some("org.example.Job")
+mainClass in assembly := Some("org.spixi.Job")
 
 // make run command include the provided dependencies
 run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run))

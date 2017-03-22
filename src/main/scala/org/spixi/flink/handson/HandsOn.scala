@@ -17,52 +17,44 @@ package org.spixi.flink.handson
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-import org.apache.flink.api.scala._
+import org.apache.flink.api.common.restartstrategy.RestartStrategies
+import org.apache.flink.streaming.api.scala._
+import org.spixi.flink.handson.sources.TimedSource
 
-/**
-  * Skeleton for a Flink Job.
-  *
-  * For a full example of a Flink Job, see the WordCountJob.scala file in the
-  * same package/directory or have a look at the website.
-  *
-  * You can also generate a .jar file that you can submit on your Flink
-  * cluster. Just type
-  * {{{
-  *   sbt clean assembly
-  * }}}
-  * in the projects root directory. You will find the jar in
-  * target/scala-2.11/Flink\ Project-assembly-0.1-SNAPSHOT.jar
-  *
-  */
-object Job {
+object HandsOn {
   def main(args: Array[String]) {
     // set up the execution environment
-    val env = ExecutionEnvironment.getExecutionEnvironment
+    val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-    /**
-      * Here, you can start creating your execution plan for Flink.
-      *
-      * Start with getting some data from the environment, like
-      * env.readTextFile(textPath);
-      *
-      * then, transform the resulting DataSet[String] using operations
-      * like:
-      *   .filter()
-      *   .flatMap()
-      *   .join()
-      *   .group()
-      *
-      * and many more.
-      * Have a look at the programming guide:
-      *
-      * http://flink.apache.org/docs/latest/programming_guide.html
-      *
-      * and the examples
-      *
-      * http://flink.apache.org/docs/latest/examples.html
-      *
-      */
     // execute program
     env.execute("Flink Scala API Skeleton")
   }
+
+  private def generateSensorData(env: StreamExecutionEnvironment) = {
+    env.setRestartStrategy(RestartStrategies.fixedDelayRestart(1000, 1000))
+    env.setParallelism(1)
+    env.disableOperatorChaining
+
+    val SLOWDOWN_FACTOR = 1
+    val PERIOD_MS = 100
+
+    val timestampSource = env.addSource(new TimedSource(PERIOD_MS, SLOWDOWN_FACTOR)).name("test data")
+
+  }
+  /*
+  private def generateSensorData(env: StreamExecutionEnvironment) = {
+
+    // Transform into sawtooth pattern
+    val sawtoothStream = timestampSource.map(new SawtoothFunction(10)).name("sawTooth")
+    // Simulate temp sensor
+    val tempStream = sawtoothStream.map(new AssignKeyFunction("temp")).name("assignKey(temp)")
+    // Make sine wave and use for pressure sensor
+    val pressureStream = sawtoothStream.map(new SineWaveFunction).name("sineWave").map(new AssignKeyFunction("pressure")).name("assignKey(pressure")
+    // Make square wave and use for door sensor
+    val doorStream = sawtoothStream.map(new SquareWaveFunction).name("squareWave").map(new AssignKeyFunction("door")).name("assignKey(door)")
+    // Combine all the streams into one and write it to Kafka
+    val sensorStream = tempStream.union(pressureStream).union(doorStream)
+    sensorStream
+  }
+ */
 }
