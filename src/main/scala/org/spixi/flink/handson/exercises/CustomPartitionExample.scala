@@ -13,10 +13,11 @@ object CustomPartitionExample {
     env.setParallelism(2)
 
     val source = env.addSource(new TimedKeyValueSource(PERIOD_MS)).name("Simple timed key-value Source")
-    println("\n\nD\n\n")
-    source.partitionCustom(new CustomPartitioner(), event => event.key)
 
-    source.writeAsText(destinationPath, WriteMode.OVERWRITE)
+    source
+      .partitionCustom(new CustomPartitioner(), event => event.key)
+      .writeAsText(destinationPath, WriteMode.OVERWRITE)
+
   }
 
 }

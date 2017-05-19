@@ -8,8 +8,8 @@ class CustomPartitioner extends Partitioner[String] {
 
   override def partition(key: String, numPartitions: Int): Int = {
     Try { (key.toInt, numPartitions == 2) } match {
-      case Success((k, true)) => k.hashCode % 2
-      case Success((k, false)) => k.hashCode
+      case Success((k, true)) => k % numPartitions
+      case Success((k, false)) => k % numPartitions
       case _ => throw new RuntimeException("Can't create the custom partitioner.")
     }
   }
