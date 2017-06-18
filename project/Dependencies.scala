@@ -16,10 +16,17 @@ object Dependencies {
     lazy val scala = namespace %% "scala-influxdb-client" % version
   }
 
+  object lazyLogging {
+    lazy val namespace = "com.typesafe.scala-logging"
+    lazy val version = "3.5.0"
+    lazy val logger = namespace %% "scala-logging" % version
+  }
+
   lazy val addons = Seq(
     flink.core % Provided,
     flink.streaming % Provided,
     flink.clients % Provided,
+    lazyLogging.logger,
     influxdb.scala
   )
 
