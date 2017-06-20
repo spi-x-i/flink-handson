@@ -17,6 +17,7 @@ package org.spixi.flink.handson
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
+import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.scala._
 import org.spixi.flink.handson.models.{KeyedTimeEvent, SupportEvent}
 import org.spixi.flink.handson.sources.{ControlStreamSource, EventStreamSource}
@@ -26,13 +27,20 @@ object HandsOn {
   def main(args: Array[String]) {
     // set up the execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
+    env.setParallelism(1)
+    env.enableCheckpointing(2000, CheckpointingMode.EXACTLY_ONCE)
 
-    val mainInput: DataStream[KeyedTimeEvent[String]] = env.addSource(new EventStreamSource)
+    val mainInput: DataStream[KeyedTimeEvent[String]] =
+      env.addSource(new EventStreamSource("Goofie", "Donald", "Mikey"))
+    // mainInput.print()
 
     val supportInput: DataStream[SupportEvent[Int]] =
       env.addSource(new ControlStreamSource("Goofie", "Donald", "Mikey"))
+    // supportInput.print()
 
     val result = mainInput.connect(supportInput.broadcast).process(new SupportFunction)
+
+    result.print()
 
     // execute program
     env.execute("Flink Scala API Skeleton")

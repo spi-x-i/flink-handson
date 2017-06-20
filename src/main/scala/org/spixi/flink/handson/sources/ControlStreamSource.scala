@@ -33,11 +33,13 @@ class ControlStreamSource(message: String*) extends ParallelSourceFunction[Suppo
         Map("name" -> supportMessage, "version" -> version.toString)
       )
       // Wait a little bit
-      Thread.sleep(rand.nextInt(1000))
+      Thread.sleep(2000)
 
       ctx.getCheckpointLock.synchronized {
         ctx.collect(event)
       }
+
+      println("CONTROL EMITTED " + event)
 
       count += 1
     }

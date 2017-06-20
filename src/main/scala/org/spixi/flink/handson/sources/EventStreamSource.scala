@@ -7,7 +7,7 @@ import org.spixi.flink.handson.models.KeyedTimeEvent
 
 import scala.util.Random
 
-class EventStreamSource() extends ParallelSourceFunction[KeyedTimeEvent[String]] {
+class EventStreamSource(keys: String*) extends ParallelSourceFunction[KeyedTimeEvent[String]] {
 
   private val isRunning: AtomicBoolean = new AtomicBoolean(true)
 
@@ -20,11 +20,13 @@ class EventStreamSource() extends ParallelSourceFunction[KeyedTimeEvent[String]]
   override def run(ctx: SourceFunction.SourceContext[KeyedTimeEvent[String]]): Unit = {
 
     while (isRunning.get() && count < 100) {
-      val event = KeyedTimeEvent(System.currentTimeMillis(), "key", "event")
-      Thread.sleep(rand.nextInt(300))
+      val event = KeyedTimeEvent(System.currentTimeMillis(), rand.shuffle(keys).head, "event")
+      Thread.sleep(1000)
       ctx.getCheckpointLock.synchronized {
         ctx.collect(event)
       }
+
+      println("EVENT EMITTED " + event)
       count += 1
     }
   }
