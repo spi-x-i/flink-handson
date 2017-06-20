@@ -4,14 +4,14 @@ import java.util
 import java.util.Collections
 
 import org.apache.flink.streaming.api.checkpoint.ListCheckpointed
-import org.apache.flink.streaming.api.functions.co.{CoProcessFunction, RichCoProcessFunction}
 import org.apache.flink.util.Collector
 import org.spixi.flink.handson.SupportFunction.{SupportBody, SupportRecord, SupportType}
 import org.spixi.flink.handson.models.{KeyedTimeEvent, SupportEvent}
 import com.typesafe.scalalogging.LazyLogging
+import org.apache.flink.api.common.state.MapState
+import org.apache.flink.streaming.api.functions.co.CoProcessFunction
 
 import scala.collection.mutable
-
 import scala.collection.JavaConverters._
 
 object SupportFunction {
@@ -19,12 +19,14 @@ object SupportFunction {
   type SupportType = String
   type SupportBody = String
 
+  type Context = CoProcessFunction[KeyedTimeEvent[String], SupportEvent[Int], String]#Context
+
   case class SupportRecord(desc: String, version: Int)
 
 }
 
 class SupportFunction
-    extends RichCoProcessFunction[KeyedTimeEvent[String], SupportEvent[Int], String]
+    extends CoProcessFunction[KeyedTimeEvent[String], SupportEvent[Int], String]
     with ListCheckpointed[util.Map[SupportType, SupportRecord]]
     with LazyLogging {
 
@@ -36,7 +38,7 @@ class SupportFunction
   private var supports = mutable.Map.empty[SupportType, SupportBody]
 
   override def processElement1(event: KeyedTimeEvent[String],
-                               ctx: CoProcessFunction.Context,
+                               ctx: SupportFunction.Context,
                                out: Collector[String]): Unit = {
     // verify the message body has been already loaded
     val supportBody = supports.getOrElseUpdate(event.key, rand.nextString(32))
@@ -45,7 +47,7 @@ class SupportFunction
   }
 
   override def processElement2(message: SupportEvent[Int],
-                               ctx: CoProcessFunction.Context,
+                               ctx: SupportFunction.Context,
                                out: Collector[String]): Unit = {
     message match {
       case SupportEvent(_, descriptionCurrent, infoCurrent) =>
@@ -73,7 +75,5 @@ class SupportFunction
   override def snapshotState(checkpointId: Long, timestamp: Long): util.List[util.Map[SupportType, SupportRecord]] = {
     Collections.singletonList(supportHistory.asJava)
   }
-
-  override def onTimer(timestamp: Long, ctx: CoProcessFunction.OnTimerContext, out: Collector[String]): Unit = {}
 
 }

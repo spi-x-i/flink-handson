@@ -4,7 +4,7 @@ object Dependencies {
 
   object flink {
     lazy val namespace = "org.apache.flink"
-    lazy val version = "1.2.0"
+    lazy val version = "1.3.0"
     lazy val core = namespace %% "flink-scala" % version
     lazy val streaming = namespace %% "flink-streaming-scala" % version
     lazy val clients = namespace %% "flink-clients" % version
