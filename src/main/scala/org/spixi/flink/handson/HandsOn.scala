@@ -27,7 +27,7 @@ object HandsOn {
   def main(args: Array[String]) {
     // set up the execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(1)
+
     env.enableCheckpointing(2000, CheckpointingMode.EXACTLY_ONCE)
 
     val mainInput: DataStream[KeyedTimeEvent[String]] =
@@ -38,7 +38,7 @@ object HandsOn {
       env.addSource(new ControlStreamSource("Goofie", "Donald", "Mikey"))
     // supportInput.print()
 
-    val result = mainInput.connect(supportInput.broadcast).process(new SupportFunction)
+    val result = mainInput.connect(supportInput.broadcast).process(new SupportFunction).uid("Process Function")
 
     result.print()
 

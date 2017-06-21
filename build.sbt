@@ -23,3 +23,8 @@ run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in (Comp
 
 // exclude Scala library from assembly
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _ *) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}

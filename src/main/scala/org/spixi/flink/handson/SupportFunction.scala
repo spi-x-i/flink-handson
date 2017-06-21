@@ -33,10 +33,10 @@ class SupportFunction
 
   private val rand = new scala.util.Random
 
-  private var supportHistory = Map.empty[String, SupportRecord]
+  private var supportHistory = mutable.Map.empty[String, SupportRecord]
 
   @transient
-  private var supports: mutable.Map[SupportType, SupportBody]  = _
+  private var supports: mutable.Map[SupportType, SupportBody] = _
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
@@ -48,8 +48,20 @@ class SupportFunction
                                ctx: SupportFunction.Context,
                                out: Collector[String]): Unit = {
     // verify the message body has been already loaded, skip otherwise
-    val supportBody = supports.getOrElse(event.key, "NO MESSAGE AVAILABLE")
-    // compute output abiding by the prediction
+    val supportBody = if (supports.contains(event.key)) {
+      // we have the message, so we should collect
+      supports(event.key)
+    } else if (supportHistory.contains(event.key)) {
+      // the message is not loaded, but we have a support message, so we can load it
+      val (name, version) = (event.key, supportHistory(event.key).version)
+      supports = supports.updated(name, s"$name on version $version")
+      supports(event.key)
+    } else {
+      // skipped event
+      val supportBody = "NO MESSAGE AVAILABLE"
+      supportBody
+    }
+
     out.collect(s"${event.key} -> $supportBody")
   }
 
@@ -70,28 +82,29 @@ class SupportFunction
             if (supports.contains(infoCurrent("name")))
               supports =
                 supports.updated(infoCurrent("name"), s"${infoCurrent("name")} on version ${infoCurrent("version")}")
-            else
-              supports(infoCurrent("name")) = s"${infoCurrent("name")} on version ${infoCurrent("version")}"
           }
         } else {
-          // Inserting brand-new message entry
-          supports(infoCurrent("name")) = s"${infoCurrent("name")} on version ${infoCurrent("version")}"
+          // Inserting brand-new message entry in history
+          supportHistory(infoCurrent("name")) =
+            SupportRecord(descriptionCurrent.toString, infoCurrent("version").toInt)
         }
+        println("\n Modified support history " + supportHistory.isEmpty)
       case _ => logger.warn(s"Process function was not able to interpret control event message $message .")
     }
   }
 
   override def restoreState(state: util.List[util.HashMap[SupportType, SupportRecord]]): Unit = {
+    println("\n" + "Restoring snapshot " + state.asScala.map(_.asScala) + "\n")
     supportHistory = state.asScala
       .map { hashMap: util.HashMap[SupportType, SupportRecord] =>
         hashMap.asScala
       }
       .reduceLeft(_ ++ _)
-      .toMap
   }
 
   override def snapshotState(checkpointId: Long,
                              timestamp: Long): util.List[util.HashMap[SupportType, SupportRecord]] = {
+    println("\n" + "Successfull snapshot " + supportHistory.keys + "\n")
     Collections.singletonList(new util.HashMap[SupportType, SupportRecord](supportHistory.asJava))
   }
 
