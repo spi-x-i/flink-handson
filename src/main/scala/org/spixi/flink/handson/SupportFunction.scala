@@ -8,7 +8,7 @@ import org.apache.flink.util.Collector
 import org.spixi.flink.handson.SupportFunction.{SupportBody, SupportRecord, SupportType}
 import org.spixi.flink.handson.models.{KeyedTimeEvent, SupportEvent}
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.flink.api.common.state.MapState
+
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.co.CoProcessFunction
 
@@ -69,6 +69,7 @@ class SupportFunction
                                ctx: SupportFunction.Context,
                                out: Collector[String]): Unit = {
     message match {
+
       case SupportEvent(_, descriptionCurrent, infoCurrent) =>
         // check if the history has already received this control
         if (supportHistory.contains(infoCurrent("name"))) {
@@ -88,7 +89,7 @@ class SupportFunction
           supportHistory(infoCurrent("name")) =
             SupportRecord(descriptionCurrent.toString, infoCurrent("version").toInt)
         }
-        println("\n Modified support history " + supportHistory.isEmpty)
+
       case _ => logger.warn(s"Process function was not able to interpret control event message $message .")
     }
   }
@@ -104,7 +105,7 @@ class SupportFunction
 
   override def snapshotState(checkpointId: Long,
                              timestamp: Long): util.List[util.HashMap[SupportType, SupportRecord]] = {
-    println("\n" + "Successfull snapshot " + supportHistory.keys + "\n")
+    println("\n" + "Successfull snapshot " + supportHistory + "\n")
     Collections.singletonList(new util.HashMap[SupportType, SupportRecord](supportHistory.asJava))
   }
 
