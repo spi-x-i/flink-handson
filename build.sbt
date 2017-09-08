@@ -1,22 +1,33 @@
-resolvers in ThisBuild ++= Seq(
-  "Apache Development Snapshot Repository" at "https://repository.apache.org/content/repositories/snapshots/",
-  Resolver.mavenLocal)
+import sbt._
+import sbt.Keys._
 
-name := "Flink Hands-On"
+lazy val root = (project in file("."))
+  .settings(Commons.settings: _*)
+  .settings(
+    name := "flink-hands-on",
+    publish := {},
+    publishLocal := {}
+  )
+  .aggregate(
+    `simple-handson`,
+    `flink-jpmml-ff`
+  )
 
-version := "0.1-SNAPSHOT"
+lazy val `simple-handson` = (project in file("simple-handson"))
+  .settings(Commons.settings: _*)
+  .settings(
+    name := "simple-handson",
+    libraryDependencies ++= Dependencies.simpleDependencies
+  )
 
-organization := "org.example"
+lazy val `flink-jpmml-ff` = (project in file("flink-jpmml-ff"))
+  .settings(Commons.settings: _*)
+  .settings(
+    name := "flink-jpmml-ff",
+    libraryDependencies ++= Dependencies.jpmmlDependencies
+  )
 
-scalaVersion in ThisBuild := "2.11.7"
-
-lazy val root = (project in file(".")).settings(
-  libraryDependencies ++= Dependencies.addons
-)
-
-onLoad in Global := (Command.process("scalafmt", _: State)) compose (onLoad in Global).value
-
-mainClass in assembly := Some("org.example.Job")
+scalafmtOnCompile in ThisBuild := true
 
 // make run command include the provided dependencies
 run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run))
