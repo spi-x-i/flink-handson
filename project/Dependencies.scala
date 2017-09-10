@@ -22,6 +22,12 @@ object Dependencies {
     lazy val core = namespace %% "flink-jpmml-scala" % version
   }
 
+  private object logging {
+    lazy val namespace = "org.slf4j"
+    lazy val version = "1.7.7"
+    lazy val slf4j = namespace % "slf4j-api" % version
+  }
+
   lazy val simpleDependencies = Seq(
     flink.core % Provided,
     flink.streaming % Provided,
@@ -33,7 +39,8 @@ object Dependencies {
     flink.core % Provided,
     flink.streaming % Provided,
     flink.clients % Provided,
-    jpmml.core
+    jpmml.core,
+    logging.slf4j
   )
 
 }
