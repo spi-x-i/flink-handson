@@ -59,10 +59,7 @@ object Startup {
           if (pred._2.value.get > 0.0) (pred._1, 1.0) else (pred._1, -1.0)
         }
 
-
-
     val accuracyStream = normalizedOutput.keyBy(_._1.modelId).map(new AccuracyComputation())
-
 
     versionStream.print()
     accuracyStream.print()
