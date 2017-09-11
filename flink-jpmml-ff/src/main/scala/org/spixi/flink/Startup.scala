@@ -3,16 +3,12 @@ package org.spixi.flink
 import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
-import io.radicalbit.flink.pmml.scala.models.prediction.Score
-import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.ml.math.DenseVector
 import org.apache.flink.streaming.api.scala._
 import org.spixi.flink.functions.ModelIdSetter
 import org.spixi.flink.generation.EventGenerator
 import org.spixi.flink.generation.function.{AccuracyComputation, ControlStreamer}
 import org.spixi.flink.generation.models.Pixel
-
-import scala.util.Try
 
 object Startup {
 

@@ -3,7 +3,8 @@ package org.spixi.flink.bench
 import java.util.{Properties, UUID}
 
 import io.radicalbit.flink.pmml.scala.models.control.AddMessage
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.ml.math.DenseVector
+import org.apache.flink.streaming.api.scala._
 import org.spixi.flink.bench.sources.EventSource
 
 object BenchmarkingJob {
@@ -23,10 +24,22 @@ object BenchmarkingJob {
     // Events source
     val eventStream = see.addSource(new EventSource(properties))
 
-    val supportStream = see.fromCollection(Seq(
-      AddMessage(uuid,
-        version.toString,
-        getClass.getResourceAsStream("/Users/aspina/Workspace/Radical/Talks/JugMilano/flink-handson/flink-jpmml-ff/src/main/resources/svm_model_1.pmml"))))
+    val supportStream = see.fromCollection(
+      Seq(
+        AddMessage(
+          uuid,
+          version.toLong,
+          "/Users/aspina/Workspace/Radical/Talks/JugMilano/flink-handson/flink-jpmml-ff/src/main/resources/svm_model_1.pmml",
+          System.currentTimeMillis()
+        )))
+
+    val predictions = eventStream
+      .withSupportStream(supportStream)
+      .evaluate { (event, model) =>
+        val vectorized = DenseVector(event.r, event.g)
+        val prediction = model.predict(vectorized)
+        (event, prediction)
+      }
 
     see.execute("flpmml micro benchmark")
   }
