@@ -81,7 +81,8 @@ object Startup {
 
     val accuracyStream = normalizedOutput.keyBy(_._1.modelId).map(new AccuracyComputation())
 
-    val errorOut: DataStream[(Double, Double)] = accuracyStream.flatMap(new ErrorFormatter())
+    val errorOut: DataStream[(Double, Double)] =
+      accuracyStream.connect(versionStream.broadcast).flatMap(new ErrorFormatter())
 
     val accuracyOut = versionStream.mapWith {
       case 1 => 0.48
