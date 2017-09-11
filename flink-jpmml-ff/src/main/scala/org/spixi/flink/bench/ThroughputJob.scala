@@ -50,26 +50,26 @@ object ThroughputJob {
       }
 
     val throughput = predictions
-        .assignAscendingTimestamps(_._1.occurredOn)
-        .timeWindowAll(Time.seconds(10l))
-        .apply(new RichAllWindowFunction[(Pixel, Prediction), Int, TimeWindow] {
-          private lazy val state: ValueState[Int] = {
-            val descriptor =
-              new ValueStateDescriptor[Int](
-                s"throughput_values",
-                TypeInformation.of(new TypeHint[Int]() {})
-              )
-            getRuntimeContext.getState[Int](descriptor)
-          }
+      .assignAscendingTimestamps(_._1.occurredOn)
+      .timeWindowAll(Time.seconds(10l))
+      .apply(new RichAllWindowFunction[(Pixel, Prediction), Int, TimeWindow] {
+        private lazy val state: ValueState[Int] = {
+          val descriptor =
+            new ValueStateDescriptor[Int](
+              s"throughput_values",
+              TypeInformation.of(new TypeHint[Int]() {})
+            )
+          getRuntimeContext.getState[Int](descriptor)
+        }
 
-          def greaterT: Int = Option(state.value()).getOrElse(0)
+        def greaterT: Int = Option(state.value()).getOrElse(0)
 
-          override def apply(window: TimeWindow, input: Iterable[(Pixel, Prediction)],out: Collector[Int]): Unit = {
-            val currentT = input.size
-            if (currentT > greaterT) state.update(currentT)
-            out.collect(greaterT)
-          }
-       })
+        override def apply(window: TimeWindow, input: Iterable[(Pixel, Prediction)], out: Collector[Int]): Unit = {
+          val currentT = input.size
+          if (currentT > greaterT) state.update(currentT)
+          out.collect(greaterT)
+        }
+      })
 
     throughput.print()
 

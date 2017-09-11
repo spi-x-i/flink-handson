@@ -16,8 +16,8 @@ class EvaluationSplitter(side2: OutputTag[(Double, Double, Double)], side3: Outp
     val outcome = (value._1.r.toDouble, value._1.g.toDouble, value._2)
 
     version match {
-      case "5" => out.collect(outcome)
-      case "1" => ctx.output(side2, outcome)
+      case "1" => out.collect(outcome)
+      case "2" => ctx.output(side2, outcome)
       case "3" => ctx.output(side3, outcome)
       case _ =>
     }
