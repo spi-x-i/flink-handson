@@ -19,13 +19,13 @@
   <Output>
    <OutputField name="predictedValue" feature="predictedValue" targetField="Y"/>
    <OutputField name="svm_predict_function" feature="transformedValue">
-    <Apply function="+">
-     <Apply function="*">
-      <FieldRef field="predictedValue"/>
-      <Constant>1</Constant>
-     </Apply>
-     <Constant>0</Constant>
-    </Apply>
+   <Apply function="+">
+        <Apply function="*">
+         <FieldRef field="predictedValue"/>
+         <Constant>1</Constant>
+        </Apply>
+        <Constant>0</Constant>
+       </Apply>
    </OutputField>
   </Output>
   <LocalTransformations/>

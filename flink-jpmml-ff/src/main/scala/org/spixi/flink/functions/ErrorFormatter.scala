@@ -28,7 +28,7 @@ class ErrorFormatter extends RichFlatMapFunction[(String, Double), Double] with 
     val version = value._1.split("_").last
     versions = versions + version.toInt
 
-    if (version == versions.max.toString) out.collect(value._2)
+    if (version == versions.max.toString) out.collect(1 - value._2)
   }
 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {

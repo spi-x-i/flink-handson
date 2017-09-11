@@ -3,7 +3,7 @@ package org.spixi.flink
 import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
-import io.radicalbit.flink.pmml.scala.models.prediction.{Prediction, Score, Target}
+import io.radicalbit.flink.pmml.scala.models.prediction.{Prediction, Score}
 import io.radicalbit.nsdb.connector.flink.sink.NSDBSink
 import org.apache.flink.ml.math.DenseVector
 import org.apache.flink.streaming.api.scala.extensions._
@@ -59,13 +59,16 @@ object Startup {
           (event, prediction)
         }
 
+    // normalizing model evaluation output
     val normalizedOutput: DataStream[(Pixel, Double)] =
       predicted
-        .mapWith {
+        .flatMapWith {
           case (pixel, Prediction(Score(value))) =>
-            if(value > 0) (pixel, 1.0) else (pixel, -1.0)
+            if (value > 0) Seq((pixel, 1.0)) else Seq((pixel, -1.0))
+          case _ => Seq.empty
         }
 
+    // separating evaluation stream by process function
     val sideModel2Tag = OutputTag[(Double, Double, Double)]("sideModelTwo")
     val sideModel3Tag = OutputTag[(Double, Double, Double)]("sideModelThree")
 
@@ -87,13 +90,11 @@ object Startup {
       case _ => 0.0
     }
 
-    val namespace = "flink_jpmml"
-    val dimKeys = List("x", "y")
+    val namespace = config.getString("nsdb.namespace")
+    val host = config.getString("nsdb.host")
+    val port = config.getInt("nsdb.port")
 
-    val host = "localhost"
-    val port = 7817
-
-    val fSink = SinkFunction.converter(namespace, dimKeys) _
+    val fSink = SinkFunction.converter(namespace, List("x", "y")) _
     val sSink = SinkFunction.converterToSeries(namespace) _
 
     sideModel1.addSink(new NSDBSink[(Double, Double, Double)](host, port)(fSink("evaluation_1")))
