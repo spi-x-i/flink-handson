@@ -34,6 +34,12 @@ object Dependencies {
     lazy val generator =  namespace %% "random-data-generator" % version
   }
 
+  private object nsdb {
+    lazy val version = "0.0.1-SNAPSHOT"
+    lazy val namespace = "io.radicalbit.nsdb"
+    lazy val connector = namespace %% "nsdb-flink-connector" % version intransitive()
+  }
+
   lazy val simpleDependencies = Seq(
     flink.core % Provided,
     flink.streaming % Provided,
@@ -41,14 +47,13 @@ object Dependencies {
     influxdb.scala
   )
 
-
-
   lazy val jpmmlDependencies = Seq(
     flink.core % Provided,
     flink.streaming % Provided,
     flink.clients % Provided,
     jpmml.core,
     data.generator,
+    nsdb.connector,
     logging.slf4j
   )
 
