@@ -1,8 +1,8 @@
 package org.spixi.flink.functions
 
-import io.radicalbit.flink.pmml.scala.models.state.CheckpointType.MetadataCheckpoint
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.{TypeHint, TypeInformation}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction
@@ -10,7 +10,6 @@ import org.apache.flink.util.Collector
 import org.spixi.flink.generation.models.Pixel
 
 import scala.util.{Failure, Success, Try}
-
 import scala.collection.JavaConverters._
 
 class ModelIdSetter(modelApp: String) extends RichCoFlatMapFunction[Pixel, Int, Pixel] with CheckpointedFunction {
@@ -18,13 +17,18 @@ class ModelIdSetter(modelApp: String) extends RichCoFlatMapFunction[Pixel, Int, 
   @transient
   private var modelVersion: ListState[Int] = _
   @transient
-  private var currentVersion: List[Int] = _
+  private var currentVersion: Set[Int] = _
 
   override def flatMap1(value: Pixel, out: Collector[Pixel]): Unit =
     currentVersion.foreach(version => out.collect(value.copy(modelId = modelApp + "_" + version)))
 
   override def flatMap2(value: Int, out: Collector[Pixel]): Unit =
-    currentVersion = currentVersion :+ value
+    currentVersion = currentVersion + value
+
+  override def open(parameters: Configuration): Unit = {
+    super.open(parameters)
+    currentVersion = Set.empty[Int]
+  }
 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     modelVersion.clear()
