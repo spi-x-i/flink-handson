@@ -83,7 +83,7 @@ object Startup {
     val sideModel2 = sideModel1.getSideOutput(sideModel2Tag)
     val sideModel3 = sideModel1.getSideOutput(sideModel3Tag)
 
-    val namespace = "flink-jpmml"
+    val namespace = "flink_jpmml"
     val dimKeys = List("x", "y")
 
     val host = "localhost"
