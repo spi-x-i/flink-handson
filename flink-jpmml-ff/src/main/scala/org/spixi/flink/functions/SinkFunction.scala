@@ -10,4 +10,8 @@ object SinkFunction {
 
     Bit(namespace = namespace, metric = metric, dimensions = zipping).value(in._3)
   }
+
+  def converterToSeries(namespace: String, metric: String)(in: Double) : Bit =
+    Bit(namespace = namespace, metric = metric, dimensions = List.empty).value(in)
+  
 }
