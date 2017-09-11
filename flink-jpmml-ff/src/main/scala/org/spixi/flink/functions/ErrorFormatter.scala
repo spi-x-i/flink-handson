@@ -12,7 +12,7 @@ import scala.util.{Failure, Success, Try}
 
 import scala.collection.JavaConverters._
 
-class ErrorFormatter extends RichFlatMapFunction[(String, Double), Double] with CheckpointedFunction {
+class ErrorFormatter extends RichFlatMapFunction[(String, Double), (Double, Double)] with CheckpointedFunction {
 
   @transient
   private var versionsCheckpoint: ListState[Int] = _
@@ -24,12 +24,20 @@ class ErrorFormatter extends RichFlatMapFunction[(String, Double), Double] with 
     versions = Set.empty[Int]
   }
 
-  override def flatMap(value: (String, Double), out: Collector[Double]): Unit = {
+  override def flatMap(value: (String, Double), out: Collector[(Double, Double)]): Unit = {
     val version = value._1.split("_").last
     versions = versions + version.toInt
 
-    if (version == versions.max.toString) out.collect(1 - value._2)
+    if (version == versions.max.toString) out.collect((1 - value._2, computeAccuracy(version)))
   }
+
+  private def computeAccuracy(version: String): Double =
+    version.toInt match {
+      case 1 => 0.48
+      case 2 => 0.72
+      case 3 => 0.90
+      case _ => 0.0
+    }
 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     versionsCheckpoint.clear()

@@ -81,7 +81,7 @@ object Startup {
 
     val accuracyStream = normalizedOutput.keyBy(_._1.modelId).map(new AccuracyComputation())
 
-    val errorOut = accuracyStream.flatMap(new ErrorFormatter())
+    val errorOut: DataStream[(Double, Double)] = accuracyStream.flatMap(new ErrorFormatter())
 
     val accuracyOut = versionStream.mapWith {
       case 1 => 0.48
@@ -96,13 +96,14 @@ object Startup {
 
     val fSink = SinkFunction.converter(namespace, List("x", "y")) _
     val sSink = SinkFunction.converterToSeries(namespace) _
+    val cSink = SinkFunction.converterCouples(namespace, List("error")) _
 
     sideModel1.addSink(new NSDBSink[(Double, Double, Double)](host, port)(fSink("evaluation_1")))
     sideModel2.addSink(new NSDBSink[(Double, Double, Double)](host, port)(fSink("evaluation_2")))
     sideModel3.addSink(new NSDBSink[(Double, Double, Double)](host, port)(fSink("evaluation_3")))
 
-    errorOut.addSink(new NSDBSink[Double](host, port)(sSink("error_stream")))
-    accuracyOut.addSink(new NSDBSink[Double](host, port)(sSink("accuracy_stream")))
+    errorOut.addSink(new NSDBSink[(Double, Double)](host, port)(cSink("error_accuracy_stream")))
+    // accuracyOut.addSink(new NSDBSink[Double](host, port)(sSink("accuracy_stream")))
 
     accuracyStream.print()
     predicted.print()
