@@ -3,13 +3,13 @@ package org.spixi.flink
 import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
-import io.radicalbit.nsdb.api.scala.Bit
 import io.radicalbit.nsdb.connector.flink.sink.NSDBSink
 import org.apache.flink.ml.math.DenseVector
 import org.apache.flink.streaming.api.functions.ProcessFunction
+import org.apache.flink.streaming.api.scala.extensions._
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.util.Collector
-import org.spixi.flink.functions.{ModelIdSetter, SinkFunction}
+import org.spixi.flink.functions.{ErrorFormatter, ModelIdSetter, SinkFunction}
 import org.spixi.flink.generation.EventGenerator
 import org.spixi.flink.generation.function.{AccuracyComputation, ControlStreamer}
 import org.spixi.flink.generation.models.Pixel
@@ -24,10 +24,13 @@ object Startup {
 
   def main(args: Array[String]): Unit = {
 
+    // defining the model application - it has to be uuid compliant
     val modelApplication = UUID.randomUUID().toString
 
     val see = StreamExecutionEnvironment.getExecutionEnvironment
 
+    // taking from socket the model path for easy playing with
+    // just before running
     val modelPath: DataStream[String] =
       see.socketTextStream(config.getString("socket.host"), config.getInt("socket.port"))
 
@@ -95,12 +98,23 @@ object Startup {
     sideModel2.addSink(new NSDBSink[(Double, Double, Double)](host, port)(fSink("evaluation_2")))
     sideModel3.addSink(new NSDBSink[(Double, Double, Double)](host, port)(fSink("evaluation_3")))
 
-//    sideModel2.addSink(new NSDBSink[(Double, Double, Double)](host, port)(SinkFunction(namespace, "evaluation_2", dimKeys)))
-//    sideModel3.addSink(new NSDBSink[(Double, Double, Double)](host, port)(SinkFunction(namespace, "evaluation_3", dimKeys)))
-
     val accuracyStream = normalizedOutput.keyBy(_._1.modelId).map(new AccuracyComputation())
 
-    versionStream.print()
+    val errorOut = accuracyStream.flatMap(new ErrorFormatter())
+
+    val sSink = SinkFunction.converterToSeries(namespace) _
+
+    errorOut.addSink(new NSDBSink[Double](host, port)(sSink("error_stream")))
+
+    val accuracyOut = versionStream.mapWith {
+      case 1 => 0.48
+      case 2 => 0.72
+      case 3 => 0.90
+      case _ => 0.0
+    }
+
+    accuracyOut.addSink(new NSDBSink[Double](host, port)(sSink("accuracy_stream")))
+
     accuracyStream.print()
     predicted.print()
 
