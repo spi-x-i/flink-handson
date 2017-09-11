@@ -3,8 +3,6 @@ package org.spixi.flink.generation.function
 import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.api.common.typeinfo.{TypeHint, TypeInformation}
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
 import org.spixi.flink.generation.models.Pixel
 
 final case class Accuracy(modelId: String, success: Int, events: Int)
