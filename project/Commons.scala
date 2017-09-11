@@ -10,6 +10,7 @@ object Commons {
       "Apache Development Snapshot Repository" at "https://repository.apache.org/content/repositories/snapshots/",
       "Radicalbit Snapshots" at "https://tools.radicalbit.io/maven/repository/snapshots/",
       "Radicalbit Releases" at "https://tools.radicalbit.io/maven/repository/internal/",
+      Resolver.sonatypeRepo("releases"),
       Resolver.mavenLocal
     ),
     parallelExecution in Test := false,

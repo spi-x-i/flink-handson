@@ -64,7 +64,6 @@ object Startup {
     versionStream.print()
     accuracyStream.print()
     predicted.print()
-
     see.execute("FF-Job")
   }
 

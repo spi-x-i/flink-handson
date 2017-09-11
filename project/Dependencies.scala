@@ -28,6 +28,12 @@ object Dependencies {
     lazy val slf4j = namespace % "slf4j-api" % version
   }
 
+  private object data {
+    lazy val namespace = "com.danielasfregola"
+    lazy val version = "2.1"
+    lazy val generator =  namespace %% "random-data-generator" % version
+  }
+
   lazy val simpleDependencies = Seq(
     flink.core % Provided,
     flink.streaming % Provided,
@@ -35,11 +41,14 @@ object Dependencies {
     influxdb.scala
   )
 
+
+
   lazy val jpmmlDependencies = Seq(
     flink.core % Provided,
     flink.streaming % Provided,
     flink.clients % Provided,
     jpmml.core,
+    data.generator,
     logging.slf4j
   )
 
