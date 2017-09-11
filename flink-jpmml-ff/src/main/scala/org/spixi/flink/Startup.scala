@@ -56,7 +56,7 @@ object Startup {
       predicted
         .filter(_._2.value.getOrElse(0.0) != 0.0)
         .map { pred =>
-          if (pred._2.value.get > 1.0) (pred._1, 1.0) else (pred._1, -1.0)
+          if (pred._2.value.get > 0.0) (pred._1, 1.0) else (pred._1, -1.0)
         }
 
     val sideModel2Tag = OutputTag[(Double, Double, Double)]("sideModelTwo")
