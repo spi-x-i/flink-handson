@@ -3,11 +3,19 @@ package org.spixi.flink.bench
 import java.util.{Properties, UUID}
 
 import io.radicalbit.flink.pmml.scala.models.control.AddMessage
+import io.radicalbit.flink.pmml.scala.models.prediction.Prediction
+import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
+import org.apache.flink.api.common.typeinfo.{TypeHint, TypeInformation}
 import org.apache.flink.ml.math.DenseVector
-import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.scala.function.RichAllWindowFunction
+import org.apache.flink.streaming.api.windowing.time.Time
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow
+import org.apache.flink.util.Collector
 import org.spixi.flink.bench.sources.EventSource
+import org.spixi.flink.generation.models.Pixel
 
-object BenchmarkingJob {
+object HorizontalScaleJob {
 
   def main(args: Array[String]): Unit = {
 
@@ -41,7 +49,10 @@ object BenchmarkingJob {
         (event, prediction)
       }
 
+
+
     see.execute("flpmml micro benchmark")
+
   }
 
 }
