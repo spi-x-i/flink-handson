@@ -2,6 +2,7 @@ package org.spixi.flink.bench
 
 import java.util.{Properties, UUID}
 
+import com.typesafe.config.ConfigFactory
 import io.radicalbit.flink.pmml.scala.models.control.AddMessage
 import io.radicalbit.flink.pmml.scala.models.prediction.Prediction
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
@@ -19,6 +20,8 @@ object ThroughputJob {
 
   def main(args: Array[String]): Unit = {
 
+    val config = ConfigFactory.load()
+
     val see = StreamExecutionEnvironment.getExecutionEnvironment
 
     val uuid = UUID.randomUUID().toString
@@ -33,13 +36,8 @@ object ThroughputJob {
     val eventStream = see.addSource(new EventSource(properties))
 
     val supportStream = see.fromCollection(
-      Seq(
-        AddMessage(
-          uuid,
-          version.toLong,
-          "/Users/aspina/Workspace/Radical/Talks/JugMilano/flink-handson/flink-jpmml-ff/src/main/resources/svm_model_1.pmml",
-          System.currentTimeMillis()
-        )))
+      Seq(AddMessage(uuid, version.toLong, config.getString("bench.model.path"), System.currentTimeMillis()))
+    )
 
     val predictions = eventStream
       .withSupportStream(supportStream)

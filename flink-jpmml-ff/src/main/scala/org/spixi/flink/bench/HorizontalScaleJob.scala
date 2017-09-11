@@ -3,6 +3,7 @@ package org.spixi.flink.bench
 import java.util.{Properties, UUID}
 
 import io.radicalbit.flink.pmml.scala.models.control.AddMessage
+import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.ml.math.DenseVector
 import org.apache.flink.streaming.api.scala._
 import org.spixi.flink.bench.functions.HorizontalEnricher
@@ -12,6 +13,8 @@ import org.spixi.flink.generation.models.Pixel
 object HorizontalScaleJob {
 
   def main(args: Array[String]): Unit = {
+
+    val parameters = ParameterTool.fromArgs(args)
 
     val see = StreamExecutionEnvironment.getExecutionEnvironment
 
