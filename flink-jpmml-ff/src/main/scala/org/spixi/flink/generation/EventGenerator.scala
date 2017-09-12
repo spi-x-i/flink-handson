@@ -14,13 +14,11 @@ class EventGenerator extends SourceFunction[Pixel] {
   override def run(ctx: SourceFunction.SourceContext[Pixel]): Unit = {
     val elems = EventsReader.fromSource(config.getString("test.events.path"))
 
-    Thread.sleep(2500l)
-
     while (true) {
       elems foreach { event =>
         ctx.getCheckpointLock.synchronized {
           ctx.collect(event)
-          Thread.sleep(200l)
+          Thread.sleep(1000l)
         }
       }
     }
