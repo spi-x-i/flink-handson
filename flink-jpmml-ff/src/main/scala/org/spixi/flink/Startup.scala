@@ -27,6 +27,7 @@ object Startup {
     val modelApplication = UUID.randomUUID().toString
 
     val see = StreamExecutionEnvironment.getExecutionEnvironment
+    see.enableCheckpointing(5000l)
 
     // taking from socket the model path for easy playing with
     // just before running open a socket nc -l 9999 - it will be used to send model paths
