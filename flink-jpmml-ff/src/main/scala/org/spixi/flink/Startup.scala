@@ -3,6 +3,7 @@ package org.spixi.flink
 import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
+import io.radicalbit.flink.pmml.scala.models.control.ServingMessage
 import io.radicalbit.flink.pmml.scala.models.prediction.{Prediction, Score}
 import org.apache.flink.core.fs.FileSystem.WriteMode
 import org.apache.flink.ml.math.DenseVector
@@ -50,22 +51,22 @@ object Startup {
     enrichedStream.writeAsText("/Users/aspina/Desktop/main-stream.out", WriteMode.OVERWRITE).setParallelism(1)
 
     // creating the control stream
-    val controlStream = modelPath.map(new ControlStreamer(modelApplication))
+    val controlStream: DataStream[ServingMessage] = modelPath.map(new ControlStreamer(modelApplication))
 
     // flink-jpmml core evaluation
     val predicted =
       enrichedStream
       .withSupportStream(controlStream)
-      .evaluate { (event, model) =>
-        val vector = event.toVector
-        val prediction = model.predict(vector)
-        (event, prediction)
-      }
+        .evaluate { (event, model) =>
+          val vector = event.toVector
+          val prediction = model.predict(vector)
+          (event, prediction)
+        }
 
     // normalizing model evaluation output
     val normalizedOutput: DataStream[(Pixel, Double)] =
       predicted
-        .flatMapWith {
+        .flatMapWith{
           case (pixel, Prediction(Score(value))) =>
             if (value > 0) Seq((pixel, 1.0)) else Seq((pixel, -1.0))
           case _ => Seq.empty
