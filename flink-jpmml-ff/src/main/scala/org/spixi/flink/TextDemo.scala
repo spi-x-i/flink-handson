@@ -5,6 +5,7 @@ import java.util.UUID
 import com.typesafe.config.ConfigFactory
 import io.radicalbit.flink.pmml.scala.models.control.ServingMessage
 import io.radicalbit.flink.pmml.scala.models.prediction.{Prediction, Score}
+import io.radicalbit.flink.pmml.scala._
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.core.fs.FileSystem.WriteMode
 import org.apache.flink.streaming.api.scala._
@@ -13,7 +14,6 @@ import org.spixi.flink.functions.ModelIdSetter
 import org.spixi.flink.generation.EventGenerator
 import org.spixi.flink.generation.function.{AccuracyComputation, ControlStreamer}
 import org.spixi.flink.generation.models.Pixel
-import org.spixi.flink._
 
 object TextDemo {
 
@@ -59,7 +59,7 @@ object TextDemo {
     // flink-jpmml core evaluation
     val predicted =
       enrichedStream
-      .withSupportStream(controlStream)
+        .withSupportStream(controlStream)
         .evaluate { (event, model) =>
           val vector = event.toVector
           val prediction = model.predict(vector)
@@ -69,7 +69,7 @@ object TextDemo {
     // normalizing model evaluation output
     val normalizedOutput: DataStream[(Pixel, Double)] =
       predicted
-        .flatMapWith{
+        .flatMapWith {
           case (pixel, Prediction(Score(value))) =>
             if (value > 0) Seq((pixel, 1.0)) else Seq((pixel, -1.0))
           case _ => Seq.empty

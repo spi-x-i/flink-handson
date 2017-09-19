@@ -28,13 +28,6 @@ object Dependencies {
     lazy val slf4j = namespace % "slf4j-api" % version
   }
 
-  private object nsdb {
-    lazy val version = "0.0.1-SNAPSHOT"
-    lazy val namespace = "io.radicalbit.nsdb"
-    lazy val connector = namespace %% "nsdb-flink-connector" % version intransitive()
-  }
-
-
   lazy val simpleDependencies = Seq(
     flink.core % Provided,
     flink.streaming % Provided,
@@ -47,7 +40,6 @@ object Dependencies {
     flink.streaming % Provided,
     flink.clients % Provided,
     jpmml.core,
-    nsdb.connector,
     logging.slf4j
   )
 
